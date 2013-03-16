@@ -16,19 +16,20 @@
 
 -(void)draw2d:(CGContextRef)context{
     CGContextBeginPath(context);
-    // Set default line width
+
+// 1. Set line width
     CGContextSetLineWidth(context, 1.0);
     
-    // Set colorspace
+// 2. Set stroke color
     CGColorSpaceRef colorspace = CGColorSpaceCreateDeviceRGB();
-    CGFloat components[] = {0.0, 0.0, 1.0, 1.0};
-    CGColorRef color = CGColorCreate(colorspace, components);
-    
+    CGFloat         components[] = {0.0, 0.0, 1.0, 1.0};
+    CGColorRef      color = CGColorCreate(colorspace, components);
+    CGContextSetStrokeColorWithColor(context, color);
+
+// 3. Create pathRef
     CGMutablePathRef pathRef = CGPathCreateMutable();
 
-    
-    // Set stroke color from colorspce
-    CGContextSetStrokeColorWithColor(context, color);
+// 4. Loop over the polygons points, creating lines from one to the next
     for(int i=0; i < self.points.count; i++){
         SimpleVector3 * vec = [self.points objectAtIndex:i];
         if(i==0){
@@ -37,17 +38,19 @@
         }
         CGPathAddLineToPoint(pathRef, NULL, vec.x, vec.y);
         CGContextAddLineToPoint(context, vec.x, vec.y);
-        
-        // Set point at x,y
         CGContextMoveToPoint(context, vec.x, vec.y);
         
         if(i==[self.points count]-1){
             CGContextAddLineToPoint(context,vec.x, vec.y);
             CGPathCloseSubpath(pathRef);
             CGContextAddPath(context, pathRef);
+            //CGContextFillPath(context);
+
         }
     }
-    
+
+// 5. Release our drawing objects
+    CGPathRelease(pathRef);
     CGContextStrokePath(context);
     CGColorSpaceRelease(colorspace);
     CGColorRelease(color);
